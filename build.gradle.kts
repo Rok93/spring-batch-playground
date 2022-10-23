@@ -26,6 +26,9 @@ dependencies {
     runtimeOnly("com.mysql:mysql-connector-j")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.batch:spring-batch-test")
+
+    // 코틀린 로깅
+    implementation("io.github.microutils:kotlin-logging-jvm:3.0.2")
 }
 
 tasks.withType<KotlinCompile> {

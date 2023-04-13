@@ -19,7 +19,7 @@ class SharedConfiguration(
 
     @Bean
     fun sharedJob(): Job {
-        return jobBuilderFactory["shareJob"]
+        return jobBuilderFactory["sharedJob"]
             .incrementer(RunIdIncrementer())
             .start(this.shareStep())
             .next(this.shareStep2())

@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  rokimysql57:
+    platform: linux/x86_64
+    container_name: spring-batch-local-mysql57
+    image: library/mysql:5.7
+    command:
+      - mysqld
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-character-set-client-handshake
+      - --max_connections=1000
+      - --sql-mode=STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: payment
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: root
+      TZ: Asia/Seoul
+    volumes:
+      - ./init:/docker-entrypoint-initdb.d

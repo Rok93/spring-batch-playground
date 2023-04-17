@@ -36,6 +36,8 @@ class SavePersonConfiguration(
         return this.jobBuilderFactory["savePersonJob"]
             .incrementer(RunIdIncrementer())
             .start(savePersonStep(null))
+            .listener(SaverPersonJobExecutionListener()) // listener를 여러개 등록하면 listener를 내부적으로 list에 담아서 실행함.(순서가 유지됌!)
+            .listener(SavePersonAnnotationJobExecutionListener())
             .build()
     }
 
@@ -47,6 +49,7 @@ class SavePersonConfiguration(
             .reader(itemReader())
             .processor(DuplicateValidationProcessor(Person::name, allowDuplicate.toBoolean()))
             .writer(itemWriter())
+            .listener(SavePersonStepExecutionListener())
             .build()
     }
 

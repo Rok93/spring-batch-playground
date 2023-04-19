@@ -26,4 +26,10 @@ class Person(
     fun isNotEmptyName(): Boolean {
         return name.isNotEmpty()
     }
+
+    fun unknownName(): Person {
+        return Person(
+            name = "UNKNOWN", age = age, address = address
+        )
+    }
 }

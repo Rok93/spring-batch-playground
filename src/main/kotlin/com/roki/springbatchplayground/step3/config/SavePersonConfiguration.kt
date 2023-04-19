@@ -2,6 +2,7 @@ package com.roki.springbatchplayground.step3.config
 
 import com.roki.springbatchplayground.domain.Person
 import com.roki.springbatchplayground.exception.NotFoundNameException
+import com.roki.springbatchplayground.step3.PersonValidationRetryProcessor
 import mu.KotlinLogging
 import org.springframework.batch.core.Job
 import org.springframework.batch.core.Step
@@ -93,8 +94,9 @@ class SavePersonConfiguration(
             throw NotFoundNameException()
         }
 
+        // itemProcessor가 등록된 순서대로 동작하게 됨으로, validationProcessor는 별로 의미가 없어진다.
         return CompositeItemProcessorBuilder<Person, Person>()
-            .delegates(validationProcessor, duplicateValidationProcessor)
+            .delegates(PersonValidationRetryProcessor(), validationProcessor, duplicateValidationProcessor)
             .build()
             .apply { afterPropertiesSet() }
     }

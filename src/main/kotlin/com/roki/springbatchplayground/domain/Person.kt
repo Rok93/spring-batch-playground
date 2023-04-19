@@ -23,4 +23,7 @@ class Person(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0L,
 ) {
+    fun isNotEmptyName(): Boolean {
+        return name.isNotEmpty()
+    }
 }

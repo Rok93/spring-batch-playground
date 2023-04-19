@@ -1,6 +1,7 @@
 package com.roki.springbatchplayground.step3.config
 
 import com.roki.springbatchplayground.domain.Person
+import com.roki.springbatchplayground.exception.NotFoundNameException
 import mu.KotlinLogging
 import org.springframework.batch.core.Job
 import org.springframework.batch.core.Step
@@ -15,6 +16,7 @@ import org.springframework.batch.item.database.builder.JpaItemWriterBuilder
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder
 import org.springframework.batch.item.file.mapping.DefaultLineMapper
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer
+import org.springframework.batch.item.support.builder.CompositeItemProcessorBuilder
 import org.springframework.batch.item.support.builder.CompositeItemWriterBuilder
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -47,9 +49,13 @@ class SavePersonConfiguration(
         return this.stepBuilderFactory["savePersonStep"]
             .chunk<Person, Person>(10)
             .reader(itemReader())
-            .processor(DuplicateValidationProcessor(Person::name, allowDuplicate.toBoolean()))
+//            .processor(DuplicateValidationProcessor(Person::name, allowDuplicate.toBoolean()))
+            .processor(itemProcessor(allowDuplicate))
             .writer(itemWriter())
             .listener(SavePersonStepExecutionListener())
+            .faultTolerant()
+            .skip(NotFoundNameException::class.java)
+            .skipLimit(3) // 3번까지 허용하겠다.
             .build()
     }
 
@@ -73,6 +79,22 @@ class SavePersonConfiguration(
             .linesToSkip(1)
             .resource(ClassPathResource("person.csv"))
             .lineMapper(lineMapper)
+            .build()
+            .apply { afterPropertiesSet() }
+    }
+
+    private fun itemProcessor(allowDuplicate: String?): ItemProcessor<Person, Person> {
+        val duplicateValidationProcessor = DuplicateValidationProcessor(Person::name, allowDuplicate.toBoolean())
+        val validationProcessor = ItemProcessor<Person, Person> {
+            if(it.isNotEmptyName()) {
+                return@ItemProcessor it
+            }
+
+            throw NotFoundNameException()
+        }
+
+        return CompositeItemProcessorBuilder<Person, Person>()
+            .delegates(validationProcessor, duplicateValidationProcessor)
             .build()
             .apply { afterPropertiesSet() }
     }
